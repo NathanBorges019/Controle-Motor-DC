@@ -18,10 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -89,6 +90,19 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  LCD_Init();
+  LCD_Cursor(0,2);
+  LCD_String("DC MOTOR SYS" );
+  LCD_Cursor(1,2);
+  LCD_String("VERSION: 1.0" );
+  HAL_Delay(3000);
+  LCD_Clear();
+
+  LCD_Cursor(0,2);
+  LCD_String("DC MOTOR SYS");
+  LCD_Cursor(1,0);
+  LCD_String("<     START    >");
+
 
   /* USER CODE END 2 */
 
@@ -96,12 +110,48 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if(HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin))
+	   {
+		  HAL_Delay(10);
+		  while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
+		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+		  HAL_Delay(50);
+		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+		  LCD_Clear();
+		  LCD_Cursor(0,2);
+		  LCD_String("DC MOTOR SYS");
+		  LCD_Cursor(1,0);
+		  LCD_String("<     MENU     >");
+
+		  if(HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin))
+		  {
+			  HAL_Delay(10);
+			  while(HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
+			  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			  HAL_Delay(50);
+			  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			  LCD_Clear();
+		  }
+	   }
+	  if(HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin))
+	   {
+		  HAL_Delay(10);
+		  while (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin));
+		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+		  HAL_Delay(50);
+		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+		  LCD_Clear();
+		  LCD_Cursor(0,2);
+		  LCD_String("DC MOTOR SYS");
+		  LCD_Cursor(1,0);
+		  LCD_String("<     START    >");
+	   }
+	 }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
-}
 
 /**
   * @brief System Clock Configuration
@@ -209,11 +259,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LCD_E_Pin|BUZZER_Pin|LCD_RS_Pin|LCD_D4_Pin
-                          |LCD_D5_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, EN_Pin|BUZZER_Pin|RS_Pin|D4_Pin
+                          |D5_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LCD_D6_Pin|LCD_D7_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, D7_Pin|D6_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -222,17 +272,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LCD_E_Pin BUZZER_Pin LCD_RS_Pin LCD_D4_Pin
-                           LCD_D5_Pin */
-  GPIO_InitStruct.Pin = LCD_E_Pin|BUZZER_Pin|LCD_RS_Pin|LCD_D4_Pin
-                          |LCD_D5_Pin;
+  /*Configure GPIO pins : EN_Pin BUZZER_Pin RS_Pin D4_Pin
+                           D5_Pin */
+  GPIO_InitStruct.Pin = EN_Pin|BUZZER_Pin|RS_Pin|D4_Pin
+                          |D5_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LCD_D6_Pin LCD_D7_Pin */
-  GPIO_InitStruct.Pin = LCD_D6_Pin|LCD_D7_Pin;
+  /*Configure GPIO pins : D7_Pin D6_Pin */
+  GPIO_InitStruct.Pin = D7_Pin|D6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

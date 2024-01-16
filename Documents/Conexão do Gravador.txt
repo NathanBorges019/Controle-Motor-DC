@@ -1,0 +1,6 @@
+Com a placa BluePill em mãos e com a barra de 4 pinos voltada para a direita, a ordem dos Jumpers de cima para baixo eh:
+
+- Branco;
+- Azul;
+- Cinza;
+- Verde;
