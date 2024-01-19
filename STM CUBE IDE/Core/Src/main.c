@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -41,7 +40,6 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 
@@ -50,7 +48,6 @@ TIM_HandleTypeDef htim2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -88,7 +85,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   LCD_Init();
   LCD_Cursor(0,2);
@@ -96,62 +92,51 @@ int main(void)
   LCD_Cursor(1,2);
   LCD_String("VERSION: 1.0" );
   HAL_Delay(3000);
-  LCD_Clear();
 
   LCD_Cursor(0,2);
   LCD_String("DC MOTOR SYS");
   LCD_Cursor(1,0);
   LCD_String("<     START    >");
 
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  if(HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin))
-	   {
-		  HAL_Delay(10);
-		  while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
-		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-		  HAL_Delay(50);
-		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-		  LCD_Clear();
-		  LCD_Cursor(0,2);
-		  LCD_String("DC MOTOR SYS");
-		  LCD_Cursor(1,0);
-		  LCD_String("<     MENU     >");
-
-		  if(HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin))
-		  {
-			  HAL_Delay(10);
-			  while(HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
-			  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			  HAL_Delay(50);
-			  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			  LCD_Clear();
-		  }
-	   }
-	  if(HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin))
-	   {
-		  HAL_Delay(10);
-		  while (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin));
-		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-		  HAL_Delay(50);
-		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-		  LCD_Clear();
-		  LCD_Cursor(0,2);
-		  LCD_String("DC MOTOR SYS");
-		  LCD_Cursor(1,0);
-		  LCD_String("<     START    >");
-	   }
-	 }
+	while (1) {
     /* USER CODE END WHILE */
+		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin))
+		{
+			HAL_Delay(10);
+			while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			HAL_Delay(50);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+			LCD_Clear();
+			LCD_Cursor(0, 2);
+			LCD_String("DC MOTOR SYS");
+			LCD_Cursor(1, 0);
+			LCD_String("<     MENU     >");
+
+		}
+
+		if (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin))
+		{
+			HAL_Delay(10);
+			while (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin));
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			HAL_Delay(50);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+			LCD_Clear();
+			LCD_Cursor(0, 2);
+			LCD_String("DC MOTOR SYS");
+			LCD_Cursor(1, 0);
+			LCD_String("<     START    >");
+		}
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
+}
 
 /**
   * @brief System Clock Configuration
@@ -187,55 +172,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief TIM2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM2_Init(void)
-{
-
-  /* USER CODE BEGIN TIM2_Init 0 */
-
-  /* USER CODE END TIM2_Init 0 */
-
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM2_Init 1 */
-
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 65535;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM2_Init 2 */
-
-  /* USER CODE END TIM2_Init 2 */
-  HAL_TIM_MspPostInit(&htim2);
-
 }
 
 /**
@@ -281,6 +217,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : MOTOR_Pin */
+  GPIO_InitStruct.Pin = MOTOR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(MOTOR_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : D7_Pin D6_Pin */
   GPIO_InitStruct.Pin = D7_Pin|D6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -319,7 +261,6 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
-
   }
   /* USER CODE END Error_Handler_Debug */
 }

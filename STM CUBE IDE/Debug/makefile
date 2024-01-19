@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Controle Motor DC - Proj001
+BUILD_ARTIFACT_NAME := CONTROLE MOTOR DC_IHM
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Controle\ Motor\ DC\ -\ Proj001.elf \
+CONTROLE\ MOTOR\ DC_IHM.elf \
 
 MAP_FILES += \
-Controle\ Motor\ DC\ -\ Proj001.map \
+CONTROLE\ MOTOR\ DC_IHM.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Controle\ Motor\ DC\ -\ Proj001.list \
+CONTROLE\ MOTOR\ DC_IHM.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Controle\ Motor\ DC\ -\ Proj001.elf secondary-outputs
+main-build: CONTROLE\ MOTOR\ DC_IHM.elf secondary-outputs
 
 # Tool invocations
-Controle\ Motor\ DC\ -\ Proj001.elf Controle\ Motor\ DC\ -\ Proj001.map: $(OBJS) $(USER_OBJS) C:\Users\User\Desktop\STM32\ Blue\ Pill\Projeto\ 001\ -\ Controle\ Motor\ DC\STM\ CUBE\ IDE\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Controle Motor DC - Proj001.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\User\Desktop\STM32 Blue Pill\Projeto 001 - Controle Motor DC\STM CUBE IDE\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Controle Motor DC - Proj001.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+CONTROLE\ MOTOR\ DC_IHM.elf CONTROLE\ MOTOR\ DC_IHM.map: $(OBJS) $(USER_OBJS) C:\Users\User\Desktop\STM32\ Blue\ Pill\Projeto\ 001\ -\ Controle\ Motor\ DC\STM\ CUBE\ IDE\STM32F103C6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "CONTROLE MOTOR DC_IHM.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\User\Desktop\STM32 Blue Pill\Projeto 001 - Controle Motor DC\STM CUBE IDE\STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CONTROLE MOTOR DC_IHM.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Controle\ Motor\ DC\ -\ Proj001.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Controle Motor DC - Proj001.list"
+CONTROLE\ MOTOR\ DC_IHM.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "CONTROLE MOTOR DC_IHM.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Controle\ Motor\ DC\ -\ Proj001.elf Controle\ Motor\ DC\ -\ Proj001.list Controle\ Motor\ DC\ -\ Proj001.map Controle\\ Motor\\ DC\\ -\\ Proj001.elf default.size.stdout
+	-$(RM) CONTROLE\ MOTOR\ DC_IHM.elf CONTROLE\ MOTOR\ DC_IHM.list CONTROLE\ MOTOR\ DC_IHM.map CONTROLE\\ MOTOR\\ DC_IHM.elf default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
