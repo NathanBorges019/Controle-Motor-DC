@@ -49,6 +49,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -77,10 +79,10 @@ void Error_Handler(void);
 #define TACHOMETER_GPIO_Port GPIOB
 #define D6_Pin GPIO_PIN_3
 #define D6_GPIO_Port GPIOB
-#define ENTER_Pin GPIO_PIN_7
-#define ENTER_GPIO_Port GPIOB
-#define DEC_Pin GPIO_PIN_8
+#define DEC_Pin GPIO_PIN_7
 #define DEC_GPIO_Port GPIOB
+#define ENTER_Pin GPIO_PIN_8
+#define ENTER_GPIO_Port GPIOB
 #define INC_Pin GPIO_PIN_9
 #define INC_GPIO_Port GPIOB
 

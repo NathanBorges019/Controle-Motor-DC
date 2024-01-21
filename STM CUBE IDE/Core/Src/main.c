@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -40,14 +41,19 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-
+int menu, start;
+int inc, dec, enter;
+int aux_menu, aux_start, aux_accel;
+int aux_running;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -85,7 +91,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+
   LCD_Init();
   LCD_Cursor(0,2);
   LCD_String("DC MOTOR SYS" );
@@ -96,28 +104,15 @@ int main(void)
   LCD_Cursor(0,2);
   LCD_String("DC MOTOR SYS");
   LCD_Cursor(1,0);
-  LCD_String("<     START    >");
+  LCD_String("     START     >");
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1) {
+	while (1)
+	{
     /* USER CODE END WHILE */
-		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin))
-		{
-			HAL_Delay(10);
-			while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			HAL_Delay(50);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			LCD_Clear();
-			LCD_Cursor(0, 2);
-			LCD_String("DC MOTOR SYS");
-			LCD_Cursor(1, 0);
-			LCD_String("<     MENU     >");
-
-		}
 
 		if (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin))
 		{
@@ -126,17 +121,121 @@ int main(void)
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
 			HAL_Delay(50);
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+			HAL_Delay(50);
 			LCD_Clear();
+			aux_menu = 0;
+			start = 1;
+			menu = 0;
+		}
+		else if (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin) && start == 1)
+		{
+			aux_menu = 0;
+			aux_start = 1;
+		}
+
+		if ((aux_start == 1) && (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin)))
+		{
+			HAL_Delay(10);
+			while (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			HAL_Delay(50);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+			HAL_Delay(50);
+			LCD_Clear();
+			start = 2;
+			menu = 0;
+		}
+
+		switch (start)
+		{
+		case 1:
 			LCD_Cursor(0, 2);
 			LCD_String("DC MOTOR SYS");
 			LCD_Cursor(1, 0);
-			LCD_String("<     START    >");
+			LCD_String("     START     >");
+			aux_start = 1;
+			break;
+
+		case 2:
+
+			aux_menu = 0;
+			LCD_Cursor(0, 0);
+			LCD_String("STATUS:    ACCEL");
+			LCD_Cursor(1, 0);
+			LCD_String("RPM: 1000  t:10s");
+			HAL_Delay(10000);
+			LCD_Clear();
+
+			LCD_Cursor(0, 0);
+			LCD_String("STATUS:  RUNNING");
+			LCD_Cursor(1, 0);
+			LCD_String("RPM: 1000 t:120s");
+			HAL_Delay(10000);
+			LCD_Clear();
+
+			LCD_Cursor(0, 0);
+			LCD_String("STATUS:    DECEL");
+			LCD_Cursor(1, 0);
+			LCD_String("RPM: 1000  t:10s");
+			HAL_Delay(10000);
+			LCD_Clear();
+			start = 1;
+			menu = 0;
+			break;
 		}
+
+		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin))
+		{
+			HAL_Delay(10);
+			while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			HAL_Delay(50);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+			HAL_Delay(50);
+			LCD_Clear();
+			menu = 1;
+			start = 0;
+		}
+
+		if ((aux_menu == 1) && (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin)))
+		{
+			aux_start = 0;
+			HAL_Delay(10);
+			while (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			HAL_Delay(50);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+			HAL_Delay(50);
+			LCD_Clear();
+			menu = 2;
+		}
+
+		switch(menu)
+		{
+		case 1:
+			LCD_Cursor(0, 2);
+			LCD_String("DC MOTOR SYS");
+			LCD_Cursor(1, 0);
+			LCD_String("<     MENU     ");
+			aux_menu = 1;
+			aux_start = 0;
+			start = 0;
+			break;
+
+		case 2:
+			LCD_Cursor(0, 2);
+			LCD_String("DC MOTOR SYS");
+			LCD_Cursor(1, 0);
+			LCD_String("     CONFIG     ");
+			break;
+		}
+	}
 
     /* USER CODE BEGIN 3 */
   }
+
   /* USER CODE END 3 */
-}
+
 
 /**
   * @brief System Clock Configuration
@@ -150,10 +249,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -163,15 +265,74 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 71;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 999;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
 }
 
 /**
@@ -217,12 +378,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : MOTOR_Pin */
-  GPIO_InitStruct.Pin = MOTOR_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(MOTOR_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : D7_Pin D6_Pin */
   GPIO_InitStruct.Pin = D7_Pin|D6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -236,8 +391,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(TACHOMETER_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : ENTER_Pin DEC_Pin INC_Pin */
-  GPIO_InitStruct.Pin = ENTER_Pin|DEC_Pin|INC_Pin;
+  /*Configure GPIO pins : DEC_Pin ENTER_Pin INC_Pin */
+  GPIO_InitStruct.Pin = DEC_Pin|ENTER_Pin|INC_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
