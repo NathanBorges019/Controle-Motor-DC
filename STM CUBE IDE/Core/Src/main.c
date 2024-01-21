@@ -46,8 +46,9 @@ TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN PV */
 int menu, start;
 int inc, dec, enter;
-int aux_menu, aux_start, aux_accel;
-int aux_running;
+int aux_menu, aux_start, accel_time;
+int aux_accel, aux_running, aux_decel;
+int a_inc, accel_set, running_set, decel_set;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,7 +94,8 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+  TIM2->CCR3 = 0;
   LCD_Init();
   LCD_Cursor(0,2);
   LCD_String("DC MOTOR SYS" );
@@ -113,7 +115,6 @@ int main(void)
 	while (1)
 	{
     /* USER CODE END WHILE */
-
 		if (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin))
 		{
 			HAL_Delay(10);
@@ -159,6 +160,7 @@ int main(void)
 		case 2:
 
 			aux_menu = 0;
+			accel_set = 1;
 			LCD_Cursor(0, 0);
 			LCD_String("STATUS:    ACCEL");
 			LCD_Cursor(1, 0);
@@ -166,11 +168,13 @@ int main(void)
 			HAL_Delay(10000);
 			LCD_Clear();
 
+			accel_set = 0;
+			running_set = 1;
 			LCD_Cursor(0, 0);
 			LCD_String("STATUS:  RUNNING");
 			LCD_Cursor(1, 0);
 			LCD_String("RPM: 1000 t:120s");
-			HAL_Delay(10000);
+			HAL_Delay(120000);
 			LCD_Clear();
 
 			LCD_Cursor(0, 0);
@@ -210,6 +214,21 @@ int main(void)
 			menu = 2;
 		}
 
+		if ((accel_time == 1) && (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin)))
+		{
+			HAL_Delay(10);
+			while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+			HAL_Delay(50);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+			HAL_Delay(50);
+
+			for (a_inc = 5; a_inc <= 80; a_inc += 5)
+			{
+				a_inc += 5;
+			}
+		}
+
 		switch(menu)
 		{
 		case 1:
@@ -223,10 +242,11 @@ int main(void)
 			break;
 
 		case 2:
-			LCD_Cursor(0, 2);
-			LCD_String("DC MOTOR SYS");
+			LCD_Cursor(0, 0);
+			LCD_String("   ACCEL TIME   ");
 			LCD_Cursor(1, 0);
-			LCD_String("     CONFIG     ");
+			LCD_String("        s      ");
+			accel_time = 1;
 			break;
 		}
 	}
