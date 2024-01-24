@@ -48,7 +48,10 @@ int menu, start;
 int inc, dec, enter;
 int aux_menu, aux_start, accel_time;
 int aux_accel, aux_running, aux_decel;
-int a_inc, accel_set, running_set, decel_set;
+int a_inc, accel_set, running_set, decel_set, r_inc;
+
+char buffer_accel [15] = {0x00};
+char buffer_running [15] = {0x00};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,8 +97,14 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  void Buzzer_Teclas();
+  void ENTER_Boucing();
+  void DEC_Boucing();
+  void INC_Boucing();
+
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
   TIM2->CCR3 = 0;
+
   LCD_Init();
   LCD_Cursor(0,2);
   LCD_String("DC MOTOR SYS" );
@@ -117,12 +126,8 @@ int main(void)
     /* USER CODE END WHILE */
 		if (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin))
 		{
-			HAL_Delay(10);
-			while (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin));
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			HAL_Delay(50);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			HAL_Delay(50);
+			DEC_Boucing();
+			Buzzer_Teclas();
 			LCD_Clear();
 			aux_menu = 0;
 			start = 1;
@@ -130,18 +135,15 @@ int main(void)
 		}
 		else if (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin) && start == 1)
 		{
+			ENTER_Boucing();
 			aux_menu = 0;
 			aux_start = 1;
 		}
 
 		if ((aux_start == 1) && (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin)))
 		{
-			HAL_Delay(10);
-			while (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			HAL_Delay(50);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			HAL_Delay(50);
+			ENTER_Boucing();
+			Buzzer_Teclas();
 			LCD_Clear();
 			start = 2;
 			menu = 0;
@@ -188,14 +190,10 @@ int main(void)
 			break;
 		}
 
-		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin))
+		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin) && (accel_time == 0))
 		{
-			HAL_Delay(10);
-			while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			HAL_Delay(50);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			HAL_Delay(50);
+			INC_Boucing();
+			Buzzer_Teclas();
 			LCD_Clear();
 			menu = 1;
 			start = 0;
@@ -204,28 +202,27 @@ int main(void)
 		if ((aux_menu == 1) && (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin)))
 		{
 			aux_start = 0;
-			HAL_Delay(10);
-			while (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			HAL_Delay(50);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			HAL_Delay(50);
+			ENTER_Boucing();
+			Buzzer_Teclas();
 			LCD_Clear();
 			menu = 2;
+			a_inc = 5;
+
+			sprintf(buffer_accel, "%d", a_inc);
 		}
-
-		if ((accel_time == 1) && (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin)))
+		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin) && (a_inc <= 80) && (accel_time == 1))
 		{
-			HAL_Delay(10);
-			while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
-			HAL_Delay(50);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			HAL_Delay(50);
+			menu = 3;
+			INC_Boucing();
+			Buzzer_Teclas();
+			a_inc += 5;
+			sprintf(buffer_accel, "%d", a_inc);
 
-			for (a_inc = 5; a_inc <= 80; a_inc += 5)
+			if (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin))
 			{
-				a_inc += 5;
+				ENTER_Boucing();
+				Buzzer_Teclas();
+				a_inc = a_inc;
 			}
 		}
 
@@ -244,16 +241,50 @@ int main(void)
 		case 2:
 			LCD_Cursor(0, 0);
 			LCD_String("   ACCEL TIME   ");
-			LCD_Cursor(1, 0);
-			LCD_String("        s      ");
+			LCD_Cursor(1, 7);
+			LCD_String(buffer_accel);
+			LCD_Cursor(1, 8);
+			LCD_String("s");
 			accel_time = 1;
+			break;
+
+		case 3:
+			LCD_Cursor(0, 0);
+			LCD_String("   ACCEL TIME   ");
+			LCD_Cursor(1, 6);
+			LCD_String(buffer_accel);
+			LCD_Cursor(1, 8);
+			LCD_String("s");
+			start = 0;
 			break;
 		}
 	}
 
     /* USER CODE BEGIN 3 */
   }
+	void Buzzer_Teclas()
+		{
+		HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
+		HAL_Delay(50);
+		HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+		HAL_Delay(50);
+		}
 
+	void INC_Boucing()
+	{
+		HAL_Delay(10);
+		while (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin));
+	}
+	void DEC_Boucing()
+	{
+		HAL_Delay(10);
+		while (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin));
+	}
+	void ENTER_Boucing()
+	{
+		HAL_Delay(10);
+		while (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
+	}
   /* USER CODE END 3 */
 
 
