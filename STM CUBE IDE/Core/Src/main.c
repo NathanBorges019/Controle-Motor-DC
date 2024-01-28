@@ -44,11 +44,12 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-int menu, start;
-int inc, dec, enter;
-int aux_menu, aux_start, accel_time, set_ok;
-int aux_accel, aux_running, aux_decel, config_finish;
-int a_inc, r_inc, d_inc, inc_running, inc_decel;
+uint8_t menu, start;
+uint8_t inc, dec, enter, aux_init;
+uint8_t aux_menu, aux_start, accel_time, set_ok;
+uint8_t aux_accel, aux_running, aux_decel, config_finish;
+uint8_t a_inc, r_inc, d_inc, inc_running, inc_decel;
+uint8_t pwm, config_init, start_init, aux_pwm;
 
 char buffer_accel [15] = {0x00};
 char buffer_running [15] = {0x00};
@@ -98,6 +99,8 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
+  pwm = 0;
   void Buzzer_Teclas();
   void ENTER_Boucing();
   void DEC_Boucing();
@@ -122,6 +125,12 @@ int main(void)
 			ENTER_Boucing();
 			Buzzer_Teclas();
 			start = 3;
+			a_inc = 10;
+			sprintf(buffer_accel, "%d", a_inc);
+			r_inc = 120;
+			sprintf(buffer_running, "%d", r_inc);
+			d_inc = 10;
+			sprintf(buffer_decel, "%d", d_inc);
 		}
 
 		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin) && (start == 1))
@@ -146,9 +155,14 @@ int main(void)
 		{
 			ENTER_Boucing();
 			Buzzer_Teclas();
-			LCD_Clear();
 			start = 3;
 			aux_start = 0;
+			a_inc = 10;
+			sprintf(buffer_accel, "%d", a_inc);
+			r_inc = 120;
+			sprintf(buffer_running, "%d", r_inc);
+			d_inc = 10;
+			sprintf(buffer_decel, "%d", d_inc);
 		}
 
 		if ((aux_menu == 1) && (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin)))
@@ -175,7 +189,7 @@ int main(void)
 		}
 		else if (((aux_accel == 1) && (HAL_GPIO_ReadPin(DEC_GPIO_Port, DEC_Pin) && (a_inc <= 80) && (a_inc >5))))
 		{
-			aux_menu =0;
+			aux_menu = 0;
 			DEC_Boucing();
 			Buzzer_Teclas();
 			LCD_Clear();
@@ -257,9 +271,22 @@ int main(void)
 			ENTER_Boucing();
 			Buzzer_Teclas();
 			LCD_Clear();
-			start = 1;
+			start = 4;
 			menu = 0;
-			config_finish = 0;
+		}
+
+		if ((HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin)) && (config_init = 1))
+		{
+			ENTER_Boucing();
+			Buzzer_Teclas();
+			LCD_Clear();
+			a_inc = a_inc;
+			sprintf(buffer_accel, "%d", a_inc);
+			r_inc =r_inc;
+			sprintf(buffer_running, "%d", r_inc);
+			d_inc = d_inc;
+			sprintf(buffer_decel, "%d", d_inc);
+			start = 5;
 		}
 
 		switch (menu)
@@ -307,7 +334,7 @@ int main(void)
 			LCD_String("  RUNNING TIME  ");
 			LCD_Cursor(1, 6);
 			LCD_String(buffer_running);
-			LCD_Cursor(1, 8);
+			LCD_Cursor(1, 9);
 			LCD_String("s");
 			aux_decel = 1;
 			break;
@@ -355,31 +382,100 @@ int main(void)
 			LCD_Cursor(0, 0);
 			LCD_String("STATUS:    ACCEL");
 			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000  t:10s");
-			HAL_Delay(10000);
+			LCD_String("RPM: 1000");
+			LCD_Cursor(1, 11);
+			LCD_String("t:");
+			LCD_Cursor(1, 13);
+			LCD_String(buffer_accel);
+			LCD_Cursor(1, 15);
+			LCD_String("s");
+			HAL_Delay(a_inc * 1000);
 			LCD_Clear();
 
 			LCD_Cursor(0, 0);
 			LCD_String("STATUS:  RUNNING");
 			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000 t:180s");
-			HAL_Delay(180000);
+			LCD_String("RPM: 1000");
+			LCD_Cursor(1, 10);
+			LCD_String("t:");
+			LCD_Cursor(1, 12);
+			LCD_String(buffer_running);
+			LCD_Cursor(1, 15);
+			LCD_String("s");
+			HAL_Delay(r_inc * 1000);
 			LCD_Clear();
 
 			LCD_Cursor(0, 0);
 			LCD_String("STATUS:    DECEL");
 			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000  t:10s");
-			HAL_Delay(10000);
+			LCD_String("RPM: 1000");
+			LCD_Cursor(1, 11);
+			LCD_String("t:");
+			LCD_Cursor(1, 13);
+			LCD_String(buffer_decel);
+			LCD_Cursor(1, 15);
+			LCD_String("s");
+			HAL_Delay(d_inc * 1000);
 			LCD_Clear();
 			start = 1;
 			break;
+
+		case 4:
+			LCD_Cursor(0, 2);
+			LCD_String("DC MOTOR SYS");
+			LCD_Cursor(1, 0);
+			LCD_String("     START     >");
+			config_init = 1;
+			config_finish = 0;
+			break;
+
+		case 5:
+			LCD_Cursor(0, 0);
+			LCD_String("STATUS:    ACCEL");
+			LCD_Cursor(1, 0);
+			LCD_String("RPM: 1000");
+			LCD_Cursor(1, 11);
+			LCD_String("t:");
+			LCD_Cursor(1, 13);
+			LCD_String(buffer_accel);
+			LCD_Cursor(1, 15);
+			LCD_String("s");
+			HAL_Delay(a_inc * 1000);
+			LCD_Clear();
+
+			LCD_Cursor(0, 0);
+			LCD_String("STATUS:  RUNNING");
+			LCD_Cursor(1, 0);
+			LCD_String("RPM: 1000");
+			LCD_Cursor(1, 10);
+			LCD_String("t:");
+			LCD_Cursor(1, 12);
+			LCD_String(buffer_running);
+			LCD_Cursor(1, 15);
+			LCD_String("s");
+			HAL_Delay(r_inc * 1000);
+			LCD_Clear();
+
+			LCD_Cursor(0, 0);
+			LCD_String("STATUS:    DECEL");
+			LCD_Cursor(1, 0);
+			LCD_String("RPM: 1000");
+			LCD_Cursor(1, 11);
+			LCD_String("t:");
+			LCD_Cursor(1, 13);
+			LCD_String(buffer_decel);
+			LCD_Cursor(1, 15);
+			LCD_String("s");
+			HAL_Delay(d_inc * 1000);
+			LCD_Clear();
+			start = 4;
+			break;
 		}
     /* USER CODE END WHILE */
-	}
 
     /* USER CODE BEGIN 3 */
   }
+}
 	void Buzzer_Teclas()
 	{
 		HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
@@ -404,7 +500,6 @@ int main(void)
 		while (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
 	}
   /* USER CODE END 3 */
-
 
 /**
   * @brief System Clock Configuration
@@ -465,7 +560,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 71;
+  htim2.Init.Prescaler = 72-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 999;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
