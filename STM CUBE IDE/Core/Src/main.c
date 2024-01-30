@@ -49,7 +49,8 @@ uint8_t inc, dec, enter, aux_init;
 uint8_t aux_menu, aux_start, accel_time, set_ok;
 uint8_t aux_accel, aux_running, aux_decel, config_finish;
 uint8_t a_inc, r_inc, d_inc, inc_running, inc_decel;
-uint8_t pwm, config_init, start_init, aux_pwm;
+uint8_t config_init, start_init, pwm;
+uint8_t pwm_preset, aux_pwmPreset, motor;
 
 char buffer_accel [15] = {0x00};
 char buffer_running [15] = {0x00};
@@ -100,20 +101,18 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
-  pwm = 0;
+  motor = 0;
   void Buzzer_Teclas();
   void ENTER_Boucing();
   void DEC_Boucing();
   void INC_Boucing();
+  void start_preset();
+  void start_config();
+  void sys_init();
+  void set_converter();
+  void converter_preset();
 
-  LCD_Init();
-  LCD_Cursor(0,2);
-  LCD_String("DC MOTOR SYS" );
-  LCD_Cursor(1,2);
-  LCD_String("VERSION: 1.0" );
-  HAL_Delay(3000);
-  LCD_Clear();
-  start = 1;
+  sys_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -125,12 +124,7 @@ int main(void)
 			ENTER_Boucing();
 			Buzzer_Teclas();
 			start = 3;
-			a_inc = 10;
-			sprintf(buffer_accel, "%d", a_inc);
-			r_inc = 120;
-			sprintf(buffer_running, "%d", r_inc);
-			d_inc = 10;
-			sprintf(buffer_decel, "%d", d_inc);
+			converter_preset();
 		}
 
 		if (HAL_GPIO_ReadPin(INC_GPIO_Port, INC_Pin) && (start == 1))
@@ -157,12 +151,7 @@ int main(void)
 			Buzzer_Teclas();
 			start = 3;
 			aux_start = 0;
-			a_inc = 10;
-			sprintf(buffer_accel, "%d", a_inc);
-			r_inc = 120;
-			sprintf(buffer_running, "%d", r_inc);
-			d_inc = 10;
-			sprintf(buffer_decel, "%d", d_inc);
+			converter_preset();
 		}
 
 		if ((aux_menu == 1) && (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin)))
@@ -173,7 +162,6 @@ int main(void)
 			menu = 2;
 			aux_menu = 0;
 			a_inc = 5;
-
 			sprintf(buffer_accel, "%d", a_inc);
 		}
 
@@ -280,12 +268,7 @@ int main(void)
 			ENTER_Boucing();
 			Buzzer_Teclas();
 			LCD_Clear();
-			a_inc = a_inc;
-			sprintf(buffer_accel, "%d", a_inc);
-			r_inc =r_inc;
-			sprintf(buffer_running, "%d", r_inc);
-			d_inc = d_inc;
-			sprintf(buffer_decel, "%d", d_inc);
+			set_converter();
 			start = 5;
 		}
 
@@ -379,45 +362,8 @@ int main(void)
 			break;
 
 		case 3:
-			LCD_Cursor(0, 0);
-			LCD_String("STATUS:    ACCEL");
-			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000");
-			LCD_Cursor(1, 11);
-			LCD_String("t:");
-			LCD_Cursor(1, 13);
-			LCD_String(buffer_accel);
-			LCD_Cursor(1, 15);
-			LCD_String("s");
-			HAL_Delay(a_inc * 1000);
-			LCD_Clear();
-
-			LCD_Cursor(0, 0);
-			LCD_String("STATUS:  RUNNING");
-			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000");
-			LCD_Cursor(1, 10);
-			LCD_String("t:");
-			LCD_Cursor(1, 12);
-			LCD_String(buffer_running);
-			LCD_Cursor(1, 15);
-			LCD_String("s");
-			HAL_Delay(r_inc * 1000);
-			LCD_Clear();
-
-			LCD_Cursor(0, 0);
-			LCD_String("STATUS:    DECEL");
-			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000");
-			LCD_Cursor(1, 11);
-			LCD_String("t:");
-			LCD_Cursor(1, 13);
-			LCD_String(buffer_decel);
-			LCD_Cursor(1, 15);
-			LCD_String("s");
-			HAL_Delay(d_inc * 1000);
-			LCD_Clear();
-			start = 1;
+			aux_pwmPreset = 1;
+			start_preset();
 			break;
 
 		case 4:
@@ -430,45 +376,7 @@ int main(void)
 			break;
 
 		case 5:
-			LCD_Cursor(0, 0);
-			LCD_String("STATUS:    ACCEL");
-			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000");
-			LCD_Cursor(1, 11);
-			LCD_String("t:");
-			LCD_Cursor(1, 13);
-			LCD_String(buffer_accel);
-			LCD_Cursor(1, 15);
-			LCD_String("s");
-			HAL_Delay(a_inc * 1000);
-			LCD_Clear();
-
-			LCD_Cursor(0, 0);
-			LCD_String("STATUS:  RUNNING");
-			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000");
-			LCD_Cursor(1, 10);
-			LCD_String("t:");
-			LCD_Cursor(1, 12);
-			LCD_String(buffer_running);
-			LCD_Cursor(1, 15);
-			LCD_String("s");
-			HAL_Delay(r_inc * 1000);
-			LCD_Clear();
-
-			LCD_Cursor(0, 0);
-			LCD_String("STATUS:    DECEL");
-			LCD_Cursor(1, 0);
-			LCD_String("RPM: 1000");
-			LCD_Cursor(1, 11);
-			LCD_String("t:");
-			LCD_Cursor(1, 13);
-			LCD_String(buffer_decel);
-			LCD_Cursor(1, 15);
-			LCD_String("s");
-			HAL_Delay(d_inc * 1000);
-			LCD_Clear();
-			start = 4;
+			start_config();
 			break;
 		}
     /* USER CODE END WHILE */
@@ -498,6 +406,125 @@ int main(void)
 	{
 		HAL_Delay(10);
 		while (HAL_GPIO_ReadPin(ENTER_GPIO_Port, ENTER_Pin));
+	}
+
+	void start_preset()
+	{
+	LCD_Clear();
+	LCD_Cursor(0, 0);
+	LCD_String("STATUS:    ACCEL");
+	LCD_Cursor(1, 0);
+	LCD_String("RPM: 1000");
+	LCD_Cursor(1, 11);
+	LCD_String("t:");
+	LCD_Cursor(1, 13);
+	LCD_String(buffer_accel);
+	LCD_Cursor(1, 15);
+	LCD_String("s");
+	HAL_Delay(a_inc * 1000);
+	LCD_Clear();
+
+	LCD_Cursor(0, 0);
+	LCD_String("STATUS:  RUNNING");
+	LCD_Cursor(1, 0);
+	LCD_String("RPM: 1000");
+	LCD_Cursor(1, 10);
+	LCD_String("t:");
+	LCD_Cursor(1, 12);
+	LCD_String(buffer_running);
+	LCD_Cursor(1, 15);
+	LCD_String("s");
+	HAL_Delay(r_inc * 1000);
+	LCD_Clear();
+
+	LCD_Cursor(0, 0);
+	LCD_String("STATUS:    DECEL");
+	LCD_Cursor(1, 0);
+	LCD_String("RPM: 1000");
+	LCD_Cursor(1, 11);
+	LCD_String("t:");
+	LCD_Cursor(1, 13);
+	LCD_String(buffer_decel);
+	LCD_Cursor(1, 15);
+	LCD_String("s");
+	HAL_Delay(d_inc * 1000);
+	LCD_Clear();
+	start = 1;
+	}
+
+	void start_config()
+	{
+	LCD_Cursor(0, 0);
+	LCD_String("STATUS:    ACCEL");
+	LCD_Cursor(1, 0);
+	LCD_String("RPM: 1000");
+	LCD_Cursor(1, 11);
+	LCD_String("t:");
+	LCD_Cursor(1, 13);
+	LCD_String(buffer_accel);
+	LCD_Cursor(1, 15);
+	LCD_String("s");
+	HAL_Delay(a_inc * 1000);
+	LCD_Clear();
+
+	LCD_Cursor(0, 0);
+	LCD_String("STATUS:  RUNNING");
+	LCD_Cursor(1, 0);
+	LCD_String("RPM: 1000");
+	LCD_Cursor(1, 10);
+	LCD_String("t:");
+	LCD_Cursor(1, 12);
+	LCD_String(buffer_running);
+	LCD_Cursor(1, 15);
+	LCD_String("s");
+	HAL_Delay(r_inc * 1000);
+	LCD_Clear();
+
+	LCD_Cursor(0, 0);
+	LCD_String("STATUS:    DECEL");
+	LCD_Cursor(1, 0);
+	LCD_String("RPM: 1000");
+	LCD_Cursor(1, 11);
+	LCD_String("t:");
+	LCD_Cursor(1, 13);
+	LCD_String(buffer_decel);
+	LCD_Cursor(1, 15);
+	LCD_String("s");
+	HAL_Delay(d_inc * 1000);
+	LCD_Clear();
+	start = 4;
+	}
+
+	void sys_init()
+	{
+	LCD_Init();
+	LCD_Cursor(0, 2);
+	LCD_String("DC MOTOR SYS");
+	LCD_Cursor(1, 2);
+	LCD_String("VERSION: 1.0");
+	HAL_Delay(3000);
+	LCD_Clear();
+	start = 1;
+	}
+
+	void set_converter()
+	{
+	a_inc = a_inc;
+	sprintf(buffer_accel, "%d", a_inc);
+	r_inc = r_inc;
+	sprintf(buffer_running, "%d", r_inc);
+	d_inc = d_inc;
+	sprintf(buffer_decel, "%d", d_inc);
+	}
+
+	void converter_preset()
+	{
+	a_inc = 10;
+	sprintf(buffer_accel, "%d", a_inc);
+	r_inc = 120;
+	sprintf(buffer_running, "%d", r_inc);
+	d_inc = 10;
+	sprintf(buffer_decel, "%d", d_inc);
 	}
   /* USER CODE END 3 */
 
