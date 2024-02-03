@@ -63,28 +63,26 @@ void Error_Handler(void);
 #define LED_GPIO_Port GPIOC
 #define EN_Pin GPIO_PIN_0
 #define EN_GPIO_Port GPIOA
-#define BUZZER_Pin GPIO_PIN_1
-#define BUZZER_GPIO_Port GPIOA
-#define MOTOR_Pin GPIO_PIN_2
-#define MOTOR_GPIO_Port GPIOA
 #define RS_Pin GPIO_PIN_3
 #define RS_GPIO_Port GPIOA
 #define D4_Pin GPIO_PIN_4
 #define D4_GPIO_Port GPIOA
 #define D5_Pin GPIO_PIN_5
 #define D5_GPIO_Port GPIOA
-#define D7_Pin GPIO_PIN_12
-#define D7_GPIO_Port GPIOB
-#define TACHOMETER_Pin GPIO_PIN_13
-#define TACHOMETER_GPIO_Port GPIOB
-#define D6_Pin GPIO_PIN_3
-#define D6_GPIO_Port GPIOB
-#define DEC_Pin GPIO_PIN_7
-#define DEC_GPIO_Port GPIOB
-#define ENTER_Pin GPIO_PIN_8
-#define ENTER_GPIO_Port GPIOB
-#define INC_Pin GPIO_PIN_9
+#define D6_Pin GPIO_PIN_6
+#define D6_GPIO_Port GPIOA
+#define D7_Pin GPIO_PIN_7
+#define D7_GPIO_Port GPIOA
+#define BUZZER_Pin GPIO_PIN_11
+#define BUZZER_GPIO_Port GPIOB
+#define INC_Pin GPIO_PIN_12
 #define INC_GPIO_Port GPIOB
+#define ENTER_Pin GPIO_PIN_13
+#define ENTER_GPIO_Port GPIOB
+#define DEC_Pin GPIO_PIN_14
+#define DEC_GPIO_Port GPIOB
+#define MOTOR_Pin GPIO_PIN_5
+#define MOTOR_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
